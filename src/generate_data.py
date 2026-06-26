@@ -1,0 +1,183 @@
+"""
+generate_data.py
+Generates realistic synthetic credit card / bank transaction data
+for the Personal Finance AI Tracker project.
+"""
+
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import random
+
+# Make results reproducible — same "random" data every time we run this
+np.random.seed(42)
+random.seed(42)
+
+# ----------------------------------------------------------------
+# 1. Define categories, their merchants, and typical spending amounts
+# ----------------------------------------------------------------
+# mean = average transaction amount for this category
+# std = how much it typically varies
+# per_month = roughly how many transactions per month in this category
+
+CATEGORIES = {
+    "Groceries": {
+        "merchants": ["Walmart", "Trader Joe's", "Whole Foods", "Kroger", "Costco"],
+        "mean": 55, "std": 25, "per_month": 8
+    },
+    "Rent": {
+        "merchants": ["Greenview Apartments", "City Properties LLC"],
+        "mean": 1400, "std": 50, "per_month": 1
+    },
+    "Dining": {
+        "merchants": ["Chipotle", "Starbucks", "Local Diner", "Pizza Hut", "Sushi House"],
+        "mean": 25, "std": 15, "per_month": 10
+    },
+    "Entertainment": {
+        "merchants": ["AMC Theatres", "Steam", "Spotify", "Netflix"],
+        "mean": 20, "std": 12, "per_month": 4
+    },
+    "Transport": {
+        "merchants": ["Shell Gas", "Uber", "Lyft", "Metro Transit"],
+        "mean": 30, "std": 18, "per_month": 8
+    },
+    "Utilities": {
+        "merchants": ["City Power & Light", "Comcast", "Water Authority"],
+        "mean": 120, "std": 30, "per_month": 3
+    },
+    "Shopping": {
+        "merchants": ["Amazon", "Target", "Best Buy", "H&M"],
+        "mean": 60, "std": 40, "per_month": 5
+    },
+    "Healthcare": {
+        "merchants": ["CVS Pharmacy", "Walgreens", "City Medical Group"],
+        "mean": 40, "std": 30, "per_month": 2
+    },
+    "Subscriptions": {
+        "merchants": ["Adobe", "iCloud Storage", "Gym Membership"],
+        "mean": 15, "std": 5, "per_month": 3
+    },
+    "Income": {
+        "merchants": ["Employer Payroll"],
+        "mean": 2800, "std": 100, "per_month": 2
+    },
+}
+
+# Months where shopping spending spikes (Nov=11, Dec=12 — holiday season)
+SEASONAL_BOOST_MONTHS = {11: 1.6, 12: 2.0}
+
+# ----------------------------------------------------------------
+# 2. Function to add realistic "messiness" to merchant names
+# ----------------------------------------------------------------
+def messify_merchant(merchant: str) -> str:
+    """
+    Real bank statements show merchant names inconsistently.
+    This randomly mimics that: store numbers, abbreviations, etc.
+    """
+    variants = [
+        merchant.upper(),
+        merchant.upper().replace(" ", ""),
+        f"{merchant.upper()} #{random.randint(100, 9999)}",
+        f"{merchant.upper()[:10]} SC",  # truncated + suffix, common on statements
+        merchant.upper(),
+    ]
+    return random.choice(variants)
+
+
+# ----------------------------------------------------------------
+# 3. Generate transactions for one category across the date range
+# ----------------------------------------------------------------
+def generate_category_transactions(category, info, start_date, end_date):
+    transactions = []
+    current = start_date
+
+    while current <= end_date:
+        # How many transactions this month for this category, with some randomness
+        n_transactions = max(0, int(np.random.poisson(info["per_month"])))
+
+        for _ in range(n_transactions):
+            # Pick a random day within this month
+            day_offset = random.randint(0, 27)
+            txn_date = current + timedelta(days=day_offset)
+            if txn_date > end_date:
+                continue
+
+            # Apply seasonal boost if this category is Shopping and month is Nov/Dec
+            boost = 1.0
+            if category == "Shopping":
+                boost = SEASONAL_BOOST_MONTHS.get(txn_date.month, 1.0)
+
+            amount = max(1.0, np.random.normal(info["mean"], info["std"]) * boost)
+            amount = round(amount, 2)
+
+            merchant_clean = random.choice(info["merchants"])
+            merchant_messy = messify_merchant(merchant_clean)
+
+            transactions.append({
+                "date": txn_date.strftime("%Y-%m-%d"),
+                "merchant": merchant_messy,
+                "description": f"{merchant_messy} PURCHASE",
+                "amount": amount,
+                "category": category
+            })
+
+        # Move to the next month
+        current = (current.replace(day=1) + timedelta(days=32)).replace(day=1)
+
+    return transactions
+
+
+# ----------------------------------------------------------------
+# 4. Inject anomalies — unusually large transactions (rare, ~0.5%)
+# ----------------------------------------------------------------
+def inject_anomalies(df, fraction=0.005):
+    n_anomalies = max(1, int(len(df) * fraction))
+    anomaly_indices = np.random.choice(df.index, size=n_anomalies, replace=False)
+
+    df["is_anomaly"] = 0
+    for idx in anomaly_indices:
+        # Make the amount 5-10x larger than normal for that row
+        multiplier = np.random.uniform(5, 10)
+        df.loc[idx, "amount"] = round(df.loc[idx, "amount"] * multiplier, 2)
+        df.loc[idx, "is_anomaly"] = 1
+
+    return df
+
+
+# ----------------------------------------------------------------
+# 5. Main script logic
+# ----------------------------------------------------------------
+def main():
+    start_date = datetime(2025, 1, 1)
+    end_date = datetime(2026, 6, 30)
+
+    all_transactions = []
+    for category, info in CATEGORIES.items():
+        txns = generate_category_transactions(category, info, start_date, end_date)
+        all_transactions.extend(txns)
+
+    df = pd.DataFrame(all_transactions)
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.sort_values("date").reset_index(drop=True)
+
+    # Only inject anomalies into spending categories, not Income
+    spending_df = df[df["category"] != "Income"].copy()
+    income_df = df[df["category"] == "Income"].copy()
+    income_df["is_anomaly"] = 0
+
+    spending_df = inject_anomalies(spending_df, fraction=0.005)
+
+    final_df = pd.concat([spending_df, income_df]).sort_values("date").reset_index(drop=True)
+
+    output_path = "data/synthetic/transactions.csv"
+    final_df.to_csv(output_path, index=False)
+
+    print(f"Generated {len(final_df)} transactions.")
+    print(f"Anomalies injected: {final_df['is_anomaly'].sum()}")
+    print(f"Saved to: {output_path}")
+    print("\nFirst 5 rows:")
+    print(final_df.head())
+
+
+if __name__ == "__main__":
+    main()
