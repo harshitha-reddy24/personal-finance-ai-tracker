@@ -69,17 +69,26 @@ SEASONAL_BOOST_MONTHS = {11: 1.6, 12: 2.0}
 # ----------------------------------------------------------------
 # 2. Function to add realistic "messiness" to merchant names
 # ----------------------------------------------------------------
+PROCESSOR_PREFIXES = ["SQ *", "TST* ", "PAYPAL *", "POS DEBIT ", "CKCD ", ""]
+CITY_SUFFIXES = ["NYC", "SEATTLE WA", "AUSTIN TX", "CHI IL", "0210", "029384"]
+
 def messify_merchant(merchant: str) -> str:
     """
-    Real bank statements show merchant names inconsistently.
-    This randomly mimics that: store numbers, abbreviations, etc.
+    Real bank statements show merchant names inconsistently — often
+    truncated, prefixed by a payment processor, or reduced to a code
+    that doesn't obviously match the merchant name at all.
     """
+    clean = merchant.upper().replace("'", "").replace(" ", "")
+    abbrev = "".join(w[:3] for w in merchant.upper().split())[:8]
+
     variants = [
         merchant.upper(),
-        merchant.upper().replace(" ", ""),
+        clean,
         f"{merchant.upper()} #{random.randint(100, 9999)}",
-        f"{merchant.upper()[:10]} SC",  # truncated + suffix, common on statements
-        merchant.upper(),
+        f"{merchant.upper()[:6]} SC",
+        f"{random.choice(PROCESSOR_PREFIXES)}{clean[:10]}",
+        f"{abbrev}{random.randint(100,999)}",
+        f"{clean[:8]} {random.choice(CITY_SUFFIXES)}",
     ]
     return random.choice(variants)
 
