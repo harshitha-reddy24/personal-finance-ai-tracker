@@ -22,44 +22,44 @@ random.seed(42)
 
 CATEGORIES = {
     "Groceries": {
-        "merchants": ["Walmart", "Trader Joe's", "Whole Foods", "Kroger", "Costco"],
-        "mean": 55, "std": 25, "per_month": 8
+        "merchants": ["BigBasket", "DMart", "Reliance Fresh", "More Supermarket", "Nature's Basket"],
+        "mean": 800, "std": 350, "per_month": 8
     },
     "Rent": {
-        "merchants": ["Greenview Apartments", "City Properties LLC"],
-        "mean": 1400, "std": 50, "per_month": 1
+        "merchants": ["Lakeview Residency", "Shanti Properties"],
+        "mean": 18000, "std": 500, "per_month": 1
     },
     "Dining": {
-        "merchants": ["Chipotle", "Starbucks", "Local Diner", "Pizza Hut", "Sushi House"],
-        "mean": 25, "std": 15, "per_month": 10
+        "merchants": ["Swiggy", "Zomato", "Barbeque Nation", "Domino's", "Cafe Coffee Day"],
+        "mean": 350, "std": 200, "per_month": 10
     },
     "Entertainment": {
-        "merchants": ["AMC Theatres", "Steam", "Spotify", "Netflix"],
-        "mean": 20, "std": 12, "per_month": 4
+        "merchants": ["PVR Cinemas", "BookMyShow", "Spotify", "Netflix"],
+        "mean": 300, "std": 180, "per_month": 4
     },
     "Transport": {
-        "merchants": ["Shell Gas", "Uber", "Lyft", "Metro Transit"],
-        "mean": 30, "std": 18, "per_month": 8
+        "merchants": ["Indian Oil", "Uber", "Ola", "IRCTC"],
+        "mean": 400, "std": 250, "per_month": 8
     },
     "Utilities": {
-        "merchants": ["City Power & Light", "Comcast", "Water Authority"],
-        "mean": 120, "std": 30, "per_month": 3
+        "merchants": ["BSES Electricity", "Airtel Broadband", "Municipal Water Board"],
+        "mean": 1500, "std": 400, "per_month": 3
     },
     "Shopping": {
-        "merchants": ["Amazon", "Target", "Best Buy", "H&M"],
-        "mean": 60, "std": 40, "per_month": 5
+        "merchants": ["Amazon", "Flipkart", "Myntra", "Lifestyle"],
+        "mean": 900, "std": 600, "per_month": 5
     },
     "Healthcare": {
-        "merchants": ["CVS Pharmacy", "Walgreens", "City Medical Group"],
-        "mean": 40, "std": 30, "per_month": 2
+        "merchants": ["Apollo Pharmacy", "MedPlus", "Max Healthcare"],
+        "mean": 600, "std": 400, "per_month": 2
     },
     "Subscriptions": {
-        "merchants": ["Adobe", "iCloud Storage", "Gym Membership"],
-        "mean": 15, "std": 5, "per_month": 3
+        "merchants": ["Adobe", "iCloud Storage", "Cult.fit Membership"],
+        "mean": 250, "std": 100, "per_month": 3
     },
     "Income": {
         "merchants": ["Employer Payroll"],
-        "mean": 2800, "std": 100, "per_month": 2
+        "mean": 35000, "std": 1500, "per_month": 2
     },
 }
 
@@ -70,7 +70,7 @@ SEASONAL_BOOST_MONTHS = {11: 1.6, 12: 2.0}
 # 2. Function to add realistic "messiness" to merchant names
 # ----------------------------------------------------------------
 PROCESSOR_PREFIXES = ["SQ *", "TST* ", "PAYPAL *", "POS DEBIT ", "CKCD ", ""]
-CITY_SUFFIXES = ["NYC", "SEATTLE WA", "AUSTIN TX", "CHI IL", "0210", "029384"]
+CITY_SUFFIXES = ["MUMBAI", "BANGLR", "DELHI NCR", "PUNE MH", "0210", "029384"]
 
 def messify_merchant(merchant: str) -> str:
     """
