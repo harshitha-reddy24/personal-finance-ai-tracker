@@ -4,3 +4,4 @@ __pycache__/
 data/personal/
 .streamlit/secrets.toml
 .env
+finance.db
