@@ -1,21 +1,21 @@
-Baseline keyword accuracy: 66.50%
-Logistic Regression accuracy: 99.39%
-Random Forest accuracy: 98.16%
+Baseline keyword accuracy: 65.65%
+Logistic Regression accuracy: 98.10%
+Random Forest accuracy: 96.20%
 
 Classification report (Logistic Regression):
                precision    recall  f1-score   support
 
-       Dining       1.00      1.00      1.00        37
-Entertainment       1.00      1.00      1.00        14
-    Groceries       1.00      1.00      1.00        25
-   Healthcare       1.00      1.00      1.00         7
-       Income       1.00      1.00      1.00         9
+       Dining       1.00      1.00      1.00        34
+Entertainment       1.00      1.00      1.00        13
+    Groceries       0.93      1.00      0.96        26
+   Healthcare       1.00      0.71      0.83         7
+       Income       1.00      1.00      1.00         7
          Rent       1.00      0.75      0.86         4
-     Shopping       1.00      1.00      1.00        18
+     Shopping       1.00      1.00      1.00        17
 Subscriptions       1.00      1.00      1.00         9
-    Transport       0.97      1.00      0.98        30
-    Utilities       1.00      1.00      1.00        10
+    Transport       1.00      1.00      1.00        31
+    Utilities       0.91      1.00      0.95        10
 
-     accuracy                           0.99       163
-    macro avg       1.00      0.97      0.98       163
- weighted avg       0.99      0.99      0.99       163
+     accuracy                           0.98       158
+    macro avg       0.98      0.95      0.96       158
+ weighted avg       0.98      0.98      0.98       158

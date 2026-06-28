@@ -100,13 +100,23 @@ def generate_category_transactions(category, info, start_date, end_date):
     transactions = []
     current = start_date
 
-    while current <= end_date:
-        # How many transactions this month for this category, with some randomness
-        n_transactions = max(0, int(np.random.poisson(info["per_month"])))
+    # Fixed recurring bills (rent, income) happen EVERY month —
+    # real recurring bills don't randomly skip months the way discretionary
+    # spending does, so we treat them deterministically instead of with Poisson sampling.
+    FIXED_MONTHLY = {"Rent", "Income"}
 
-        for _ in range(n_transactions):
-            # Pick a random day within this month
-            day_offset = random.randint(0, 27)
+    while current <= end_date:
+        if category in FIXED_MONTHLY:
+            n_transactions = info["per_month"]
+        else:
+            n_transactions = max(0, int(np.random.poisson(info["per_month"])))
+
+        for i in range(n_transactions):
+            if category in FIXED_MONTHLY:
+                day_offset = int(i * (27 / max(n_transactions, 1)))
+            else:
+                day_offset = random.randint(0, 27)
+
             txn_date = current + timedelta(days=day_offset)
             if txn_date > end_date:
                 continue
