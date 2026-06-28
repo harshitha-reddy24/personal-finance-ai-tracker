@@ -1,0 +1,11 @@
+True anomalies (injected): 3
+Predicted anomalies (Isolation Forest): 8
+True anomalies caught: 2 / 3
+
+Precision: 25.00%
+Recall: 66.67%
+F1 score: 36.36%
+
+Note: false positives include legitimate holiday-season shopping spikes
+(Nov/Dec), since the model flags statistical outliers without accounting
+for seasonality. A production system would need seasonal-aware baselines.
