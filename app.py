@@ -194,4 +194,34 @@ else:
     st.write("No anomalies flagged in this dataset.")
 
 st.divider()
-st.caption("Built with Streamlit · scikit-learn · Prophet · synthetic data generator")
+
+# ----------------------------------------------------------------
+# Natural language Q&A (local LLM via Ollama)
+# ----------------------------------------------------------------
+st.subheader("💬 Ask Your Finances")
+st.caption(
+    "Ask a question in plain English, e.g. \"How much did I spend on Dining last month?\" "
+    "Powered by a local LLM (Ollama) — runs entirely on this machine, free, no API key."
+)
+
+user_question = st.text_input("Your question", placeholder="How much did I spend on Groceries this year?")
+
+if st.button("Ask") and user_question.strip():
+    try:
+        import sys
+        sys.path.insert(0, "src")
+        from llm_query import answer_question
+        with st.spinner("Thinking... (local model, may take a few seconds)"):
+            answer = answer_question("finance.db", user_question)
+        st.markdown(f"**Answer:** {answer}")
+    except FileNotFoundError:
+        st.error("finance.db not found. Run `python src/db.py` first to set up the database.")
+    except Exception as e:
+        st.error(
+            f"Couldn't reach the local LLM. Make sure Ollama is running "
+            f"(open the Ollama app, or run `ollama serve`) and that you've pulled "
+            f"a model with `ollama pull llama3.2`.\n\nError: {e}"
+        )
+
+st.divider()
+st.caption("Built with Streamlit · scikit-learn · Prophet · Ollama (local LLM) · synthetic data generator")
